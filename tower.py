@@ -1,4 +1,6 @@
-class Wizard:
+import pygame
+
+class Nailer:
     def __init__(self, pos):
-        self.type = ""
         self.pos = pos
+        self.size = 25
