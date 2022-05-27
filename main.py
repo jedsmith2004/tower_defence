@@ -5,7 +5,7 @@ import pygame
 import enemy
 import tower
 
-WIDTH, HEIGHT = 1600, 900
+WIDTH, HEIGHT = 1280, 720
 enemy_speed = 20
 
 display = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -20,12 +20,19 @@ class Game_Window:
         self.size = WIDTH * 0.75, HEIGHT * 0.75
         self.path = self.load_path(path_dir)
         self.game_screen = pygame.surface.Surface((WIDTH, HEIGHT))
+        self.path_ar = 0
 
     def load_path(self, path_dir):
         path = []
         with open(path_dir, "r", encoding='UTF8') as file:
-            for i in csv.reader(file):
-                path.append(i[0].split())
+            for idx, i in enumerate(csv.reader(file)):
+                if idx == 0:
+                    self.path_ar = [int(i[0]),int(i[1][0:].strip('\n'))]
+                    # print(WIDTH/int(self.path_ar[0]))
+                else:
+                    # print(self.path_ar[1])
+                    vx, vy = int(i[0].split()[0]) * (WIDTH/int(self.path_ar[0])), int(i[0].split()[1]) * (HEIGHT/int(self.path_ar[1]))
+                    path.append((vx, vy))
         return path
 
     def path_len(self, path):
@@ -146,7 +153,7 @@ def redraw_window(game, side_bar, perc, placed, enemies):
                                (WIDTH, HEIGHT)), (0, 0))
 
 
-    for c_enemy in enemies[::-1]:
+    for c_enemy in enemies:
         if c_enemy.dead:
             enemies.remove(c_enemy)
             del c_enemy
