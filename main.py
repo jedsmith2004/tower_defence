@@ -67,24 +67,20 @@ class Game_Window:
         return pos
 
     def check_placement(self, mx, my, radius):
-        # for idx, vec in enumerate(self.path[:-1]):
-        #     vx, vy = int(vec[0]), int(vec[1])
-        #     nx, ny = int(self.path[idx+1][0]), int(self.path[idx+1][1])
-        #     # print('m', math.sqrt((mx-vx)**2 + (my-vy)**2) + math.sqrt((mx-nx)**2 + (my-ny)**2))
-        #     # print('l', math.sqrt((nx-vx)**2 + (ny-vy)**2)+radius/4)
-        #     # print((math.sqrt((mx-vx)**2 + (my-vy)**2)), (math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2)/ 2))
-        #     # print(idx, math.sqrt((math.sqrt((mx-vx)**2 + (my-vy)**2))**2 - (math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2) / 2)**2))
-        #     v1_l = math.sqrt((nx - vx)**2 + (ny - vy)**2)
-        #     v2_l = math.sqrt((mx - vx) ** 2 + (my - vy) ** 2)
-        #     v1x, v1y = (nx - vx)/v1_l, (ny - vy)/v1_l
-        #     v2x, v2y = (mx - vx)/v2_l, (my - vy)/v2_l
-        #     angle = math.acos((v1x * v2x + v1y * v2y) / (math.sqrt(v1x**2 + v1y**2) * math.sqrt(v2x**2 + v2y**2))) % round(math.pi/2,2)
-        #
-        #     if (math.sqrt(math.sqrt((mx - vx) ** 2 + (my - vy) ** 2) ** 2) * math.sin(angle)) < radius:
-        #     # if math.sqrt(math.sqrt((mx-vx)**2 + (my-vy)**2)**2 + (math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2) / 2)**2) < radius:
-        #     # if math.sqrt((mx-vx)**2 + (my-vy)**2) + math.sqrt((mx-nx)**2 + (my-ny)**2) < (math.sqrt((nx-vx)**2 + (ny-vy)**2)/2):
-        #         print(idx, angle, (math.sqrt(math.sqrt((mx - vx) ** 2 + (my - vy) ** 2) ** 2) * math.sin(angle)))
-        #         return False
+        for v in range(len(self.path[:2])-1):
+            vx, vy = int(self.path[v][0]), int(self.path[v][1])
+            nx, ny = int(self.path[v + 1][0]), int(self.path[v + 1][1])
+
+            v1_l = math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2)
+            v2_l = math.sqrt((pygame.mouse.get_pos()[0] - nx) ** 2 + (pygame.mouse.get_pos()[1] - ny) ** 2)
+            v1x, v1y = (nx - vx) / v1_l, (ny - vy) / v1_l
+            v2x, v2y = (pygame.mouse.get_pos()[0] - nx) / v2_l, (pygame.mouse.get_pos()[1] - ny) / v2_l
+            angle = (math.pi / 2 - (abs(v1x * v2x + v1y * v2y)) * math.pi / 2)
+
+            print(v2_l, angle)
+            print(v2_l * math.sin(angle))
+            if (v2_l * math.sin(angle)) < radius:
+                return False
         return True
 
 class Side_Bar:
@@ -153,6 +149,7 @@ def redraw_window(game, side_bar, perc, placed, enemies):
                                (WIDTH, HEIGHT)), (0, 0))
 
 
+
     for c_enemy in enemies:
         if c_enemy.dead:
             enemies.remove(c_enemy)
@@ -211,6 +208,23 @@ def main():
                 #         str(pygame.mouse.get_pos()[1]))
 
         redraw_window(game, side_bar, perc, placed, enemies)
+
+        for v in range(len(game.path[:2])-1):
+            vx, vy = int(game.path[v][0]), int(game.path[v][1])
+            nx, ny = int(game.path[v + 1][0]), int(game.path[v + 1][1])
+
+            v1_l = math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2)
+            v2_l = math.sqrt((pygame.mouse.get_pos()[0] - nx) ** 2 + (pygame.mouse.get_pos()[1] - ny) ** 2)
+            v1x, v1y = (nx - vx) / v1_l, (ny - vy) / v1_l
+            v2x, v2y = (pygame.mouse.get_pos()[0] - nx) / v2_l, (pygame.mouse.get_pos()[1] - ny) / v2_l
+            angle = (math.pi/2-abs(v1x * v2x + v1y * v2y) * math.pi/2)
+            print('a', angle)
+
+
+            pygame.draw.line(display, (255, 0, 0), (game.path[v][0], game.path[v][1]), (game.path[v + 1][0], game.path[v + 1][1]), 5)
+            pygame.draw.line(display, (0,0,255), (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]), (game.path[v + 1][0], game.path[v + 1][1]))
+
+
         pygame.display.update()
 
 
