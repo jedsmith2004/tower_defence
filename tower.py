@@ -25,7 +25,7 @@ class Nailer:
         self.size = size
         self.icon = icon
         self.rotation = 0
-        self.range = 300
+        self.range = 200
         self.shoot_cooldown = 20
         self.cooldown_timer = self.shoot_cooldown
         self.projectile = None

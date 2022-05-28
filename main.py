@@ -67,20 +67,15 @@ class Game_Window:
         return pos
 
     def check_placement(self, mx, my, radius):
-        for v in range(len(self.path[:2])-1):
+        for v in range(len(self.path)-1):
             vx, vy = int(self.path[v][0]), int(self.path[v][1])
             nx, ny = int(self.path[v + 1][0]), int(self.path[v + 1][1])
 
-            v1_l = math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2)
-            v2_l = math.sqrt((pygame.mouse.get_pos()[0] - nx) ** 2 + (pygame.mouse.get_pos()[1] - ny) ** 2)
-            v1x, v1y = (nx - vx) / v1_l, (ny - vy) / v1_l
-            v2x, v2y = (pygame.mouse.get_pos()[0] - nx) / v2_l, (pygame.mouse.get_pos()[1] - ny) / v2_l
-            angle = (math.pi / 2 - (abs(v1x * v2x + v1y * v2y)) * math.pi / 2)
-
-            print(v2_l, angle)
-            print(v2_l * math.sin(angle))
-            if (v2_l * math.sin(angle)) < radius:
-                return False
+            vec_l = math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2)
+            nv_l = math.sqrt((mx - nx) ** 2 + (my - ny) ** 2)
+            pv_l = math.sqrt((mx - vx) ** 2 + (my - vy) ** 2)
+            # print(vec_l, vec_l + (HEIGHT / 18), nv_l, pv_l, (nv_l + pv_l))
+            if vec_l + radius/(vec_l/81) + 3 > (nv_l + pv_l): return False
         return True
 
 class Side_Bar:
@@ -109,10 +104,14 @@ class Side_Bar:
         pygame.draw.line(display, (150, 150, 150),
                          (self.pos[0] + self.size[0] * 0.1, self.pos[1] + self.size[1] * 0.05),
                          (self.pos[0] + self.size[0] * 0.9, self.pos[1] + self.size[1] * 0.05), 20)
-        pygame.draw.line(display, (255, 0, 0),
+        if self.health != 0:
+            pygame.draw.line(display, (255, 0, 0),
                          (self.pos[0] + self.size[0] * 0.1 * 1.12, self.pos[1] + self.size[1] * 0.05),
-                         (self.pos[0] + (self.size[0] * 0.9 * 0.99) * self.health / 100,
+                         (self.pos[0] + self.size[0] * 0.1 * 1.12 + (self.size[0] * 0.8 * 0.97) * self.health / 100,
                           self.pos[1] + self.size[1] * 0.05), 15)
+        # health number
+        font = pygame.font.SysFont("",10,True)
+        font.render(str(self.health), True, (255,0,0))
         # draw icons
         for box in range(10):
             col = (150,150,150) if box < len(self.icons) else (100,100,100)
@@ -134,21 +133,20 @@ class Side_Bar:
             self.top_icons[c] = pygame.transform.scale(pygame.image.load(c.lower()+"_top.png"), (1000, 1000))
 
 
-    def render_holding(self):
+    def render_holding(self, game):
         radius = HEIGHT / 18
         surface = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
-        pygame.draw.circle(surface, (150, 150, 150, 100), (radius, radius), radius)
+        col = (150, 150, 150, 100) if game.check_placement(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], radius) else (255, 0, 0, 100)
+        pygame.draw.circle(surface, col, (radius, radius), radius)
         mx, my = pygame.mouse.get_pos()
         display.blit(surface, (mx - radius, my - radius))
         display.blit(pygame.transform.scale(self.top_icons[self.holding], (int(radius*2),int(radius*2))), (mx - radius, my - radius))
 
 
-def redraw_window(game, side_bar, perc, placed, enemies):
+def redraw_window(game, side_bar, placed, enemies):
     game.game_screen.blit(
         pygame.transform.scale(pygame.image.load("map1/td_bg.png"),
                                (WIDTH, HEIGHT)), (0, 0))
-
-
 
     for c_enemy in enemies:
         if c_enemy.dead:
@@ -156,14 +154,15 @@ def redraw_window(game, side_bar, perc, placed, enemies):
             del c_enemy
             continue
         if not c_enemy.render(game.game_screen, game.path_evolution(c_enemy.perc)):
-            side_bar.health -= c_enemy.damage
+            if side_bar.health >= c_enemy.damage: side_bar.health -= c_enemy.damage
+            else: side_bar.health = 0
             enemies.remove(c_enemy)
             del c_enemy
     for t in placed: t.render(game.game_screen, enemies, game)
 
     display.blit(game.game_screen, (0, 0))
     side_bar.draw()
-    if side_bar.holding: side_bar.render_holding()
+    if side_bar.holding: side_bar.render_holding(game)
 
 
 def main():
@@ -207,24 +206,7 @@ def main():
                 #         str(pygame.mouse.get_pos()[0]) +
                 #         str(pygame.mouse.get_pos()[1]))
 
-        redraw_window(game, side_bar, perc, placed, enemies)
-
-        for v in range(len(game.path[:2])-1):
-            vx, vy = int(game.path[v][0]), int(game.path[v][1])
-            nx, ny = int(game.path[v + 1][0]), int(game.path[v + 1][1])
-
-            v1_l = math.sqrt((nx - vx) ** 2 + (ny - vy) ** 2)
-            v2_l = math.sqrt((pygame.mouse.get_pos()[0] - nx) ** 2 + (pygame.mouse.get_pos()[1] - ny) ** 2)
-            v1x, v1y = (nx - vx) / v1_l, (ny - vy) / v1_l
-            v2x, v2y = (pygame.mouse.get_pos()[0] - nx) / v2_l, (pygame.mouse.get_pos()[1] - ny) / v2_l
-            angle = (math.pi/2-abs(v1x * v2x + v1y * v2y) * math.pi/2)
-            print('a', angle)
-
-
-            pygame.draw.line(display, (255, 0, 0), (game.path[v][0], game.path[v][1]), (game.path[v + 1][0], game.path[v + 1][1]), 5)
-            pygame.draw.line(display, (0,0,255), (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]), (game.path[v + 1][0], game.path[v + 1][1]))
-
-
+        redraw_window(game, side_bar, placed, enemies)
         pygame.display.update()
 
 
