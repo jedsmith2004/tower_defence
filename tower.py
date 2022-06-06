@@ -31,6 +31,7 @@ class Nailer:
         self.projectile = None
         self.projectile_img = pygame.transform.scale(pygame.image.load("nail.png"), (int(self.size[0]*0.5), int(self.size[1]*0.5)))
         self.projectile_speed = 25
+        self.cost = 50
 
     def render(self, display, enemies, game):
 

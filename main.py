@@ -5,6 +5,9 @@ import pygame
 import enemy
 import tower
 
+pygame.init()
+pygame.font.init()
+
 WIDTH, HEIGHT = 1280, 720
 enemy_speed = 20
 
@@ -92,6 +95,8 @@ class Side_Bar:
         self.left_edge = self.pos[0] + self.size[0] * 0.1
         self.mid_edge = self.pos[0] + self.size[0] * 0.55
         self.top_edge = self.pos[1] + self.size[1] * 0.15
+        self.cash = 0
+        self.revenue = 10
 
         for box in range(10):
             b_x = int(self.left_edge if not box % 2 else self.mid_edge)
@@ -103,15 +108,24 @@ class Side_Bar:
         # health bar
         pygame.draw.line(display, (150, 150, 150),
                          (self.pos[0] + self.size[0] * 0.1, self.pos[1] + self.size[1] * 0.05),
-                         (self.pos[0] + self.size[0] * 0.9, self.pos[1] + self.size[1] * 0.05), 20)
+                         (self.pos[0] + self.size[0] * 0.8, self.pos[1] + self.size[1] * 0.05), 20)
         if self.health != 0:
             pygame.draw.line(display, (255, 0, 0),
                          (self.pos[0] + self.size[0] * 0.1 * 1.12, self.pos[1] + self.size[1] * 0.05),
-                         (self.pos[0] + self.size[0] * 0.1 * 1.12 + (self.size[0] * 0.8 * 0.97) * self.health / 100,
+                         (self.pos[0] + self.size[0] * 0.1 * 1.12 + (self.size[0] * 0.7 * 0.96) * self.health / 100,
                           self.pos[1] + self.size[1] * 0.05), 15)
         # health number
-        font = pygame.font.SysFont("",10,True)
-        font.render(str(self.health), True, (255,0,0))
+        font = pygame.font.SysFont("",30,True)
+        text = font.render(str(self.health), True, (255,0,0))
+        display.blit(text, (self.pos[0] + self.size[0] * 0.82, self.pos[1] + self.size[1] * 0.052-20/2))
+        # draw cash
+        font = pygame.font.SysFont("", 30, False)
+        text = font.render("$" + str(self.cash), True, (0, 200, 0))
+        display.blit(text, (self.pos[0] + self.size[0] * 0.1, self.pos[1] + self.size[1] * 0.095))
+        # draw revenue
+        font = pygame.font.SysFont("", 30, False)
+        text = font.render("^" + str(self.cash), True, (0, 255, 0))
+        display.blit(text, (self.pos[0] + self.size[0] * 0.55, self.pos[1] + self.size[1] * 0.095))
         # draw icons
         for box in range(10):
             col = (150,150,150) if box < len(self.icons) else (100,100,100)
