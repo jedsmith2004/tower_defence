@@ -1,5 +1,7 @@
 import csv
 import math
+import time
+
 import pygame
 
 import enemy
@@ -183,14 +185,24 @@ def main():
     game = Game_Window("map1/path.csv")
     side_bar = Side_Bar()
     running = True
-    perc = 0
     placed = []
     enemies = []
+    last_time = time.time()
+    rounds = [x.strip("\n").split() for x in open("rounds.txt", "r")]
+    round = 0
+    enemies_left = int(rounds[0][0])
 
     while running:
         clock.tick(60)
-        perc += 0.5
-        if perc % 10 == 0: enemies.append(enemy.L1())
+
+        if time.time()-last_time >= float(rounds[round][2]):
+            print(enemies_left, round)
+            if enemies_left > 0: enemies_left -= 1
+            else:
+                round += 1
+                enemies_left = int(rounds[round][0])
+            enemies.append(eval("enemy." + rounds[round][1] + "()"))
+            last_time = time.time()
 
         events = pygame.event.get()
         for event in events:
